@@ -1,0 +1,5 @@
+pyTelegramBotAPI==2.2.3
+Flask==0.11.1
+peewee==2.8.5
+requests==2.7.0
+psycopg2==2.6.2
