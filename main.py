@@ -21,6 +21,7 @@ bot = telebot.TeleBot(config.token)
 
 
 def get_image_uri(file_id):
+    """Преобразует файл в то, что можно вставить в <img src=\"\">"""
     file_info = bot.get_file(file_id)
     file_format = file_info.file_path.split('.')[-1]
     photo = bot.download_file(file_info.file_path)
@@ -74,11 +75,10 @@ def parse_link(query):
 @bot.message_handler(commands=['restart'])
 def start_bot(message, restarted=False):
     vizidb.create_user(get_username(message))
-    name = get_name(message)
     reply = ''
     if not restarted:
         reply = 'Привет! Я Визий, я помогу сделать тебе веб-визитку.\n'
-    reply += 'Тебя зовут {}, не так ли?'.format(name)
+    reply += 'Тебя зовут {}, не так ли?'.format(get_name(message))
     markup = telebot.types.ReplyKeyboardMarkup(
         row_width=1, one_time_keyboard=True)
     markup.add(telebot.types.KeyboardButton('Да, всё верно'),
@@ -88,10 +88,10 @@ def start_bot(message, restarted=False):
 
 
 def name_step(message):
-    if 'Да' in message.text:
+    if 'да' in message.text.lower():
         vizidb.set_name(get_username(message), get_name(message))
         bio_preparation(message, said_yes=True)
-    elif 'Нет' in message.text:
+    elif 'нет' in message.text.lower():
         new_message = bot.reply_to(
             message, 'Хм, а как тогда тебя называть?',
             reply_markup=telebot.types.ReplyKeyboardHide())
@@ -132,9 +132,8 @@ def date_preparation(message):
 
 
 def date_step(message):
-    date = message.text
     try:
-        date = datetime.strptime(date, '%d.%m.%Y')
+        date = datetime.strptime(message.text, '%d.%m.%Y')
     except ValueError:
         new_message = bot.reply_to(message, ' '.join(
             ['Слушай, какая-то странная дата.', 'Давай ещё разок попробуем.',
